@@ -37,7 +37,7 @@
                 height: 1.0,
                 width: 1.0
         }],
-        '2010-07-12' : [{
+        '2010-07-14' : [{
                 time: '12:00',
                 color: 'blue',
                 title: 'Lunch w/ Matt',
@@ -45,7 +45,7 @@
                 height: 1.0,
                 width: 1.0
         }],
-        '2010-07-10' : [{
+        '2010-07-16' : [{
                 time: '12:00',
                 color: 'blue',
                 title: 'Banff',
@@ -53,7 +53,7 @@
                 height: 1.0,
                 width: 1.0
         }],
-        '2010-07-09' : [{
+        '2010-07-17' : [{
                 time: '12:00',
                 color: 'red',
                 title: 'New Years',
@@ -61,7 +61,7 @@
                 height: 1.0,
                 width: 1.0
         }],
-        '2010-07-07' : [{
+        '2010-07-19' : [{
                 time: '12:00',
                 color: 'blue',
                 title: 'Meet Jim for Lunch',
@@ -69,7 +69,7 @@
                 height: 1.0,
                 width: 1.0
         }],
-        '2010-07-06' : [{
+        '2010-07-20' : [{
                 time: '12:00',
                 color: 'blue',
                 title: 'Buy Stuff',
@@ -77,7 +77,7 @@
                 height: 1.0,
                 width: 1.0
         }],
-        '2010-07-06' : [{
+        '2010-07-20' : [{
                 time: '12:00',
                 color: 'blue',
                 title: 'Vacation Day',
@@ -85,7 +85,7 @@
                 height: 1.0,
                 width: 1.0
         }],
-        '2010-06-30' : [{
+        '2010-07-26' : [{
                 time: '12:00',
                 color: 'red',
                 title: 'Chores',
@@ -93,7 +93,7 @@
                 height: 1.0,
                 width: 1.0
         }],
-        '2010-07-03' : [{
+        '2010-07-27' : [{
                 time: '12:00',
                 color: 'green',
                 title: 'Meeting',
@@ -101,7 +101,7 @@
                 height: 1.0,
                 width: 1.0
         }],
-        '2010-07-01' : [{
+        '2010-07-28' : [{
                 time: '17:00',
                 color: 'green',
                 title: 'Pick up Rella',
@@ -153,7 +153,7 @@
         return key;
       };
 
-      var printOptima = function(cx, cy, printText, size, color, shadow) {
+      var printOptima = function(cx, cy, printText, size, color, shadow, leftAlign) {
         var text, shadow, bbox, set;
         // Draw the text and shadow
         shadow = paper.print(cx+1, cy+1, printText, paper.getFont("Optima"), size).
@@ -164,10 +164,11 @@
         set = paper.set();
         for (var x = 0; x < text.length; x++) set.push(text[x]);
         for (var x = 0; x < shadow.length; x++) set.push(shadow[x]);
-        // Translate all of it to center it
-        bbox = set.getBBox();
-        set.translate(-bbox.width/2, -bbox.height/2);
-
+        if (!leftAlign) {
+          // Translate all of it to center it
+          bbox = set.getBBox();
+          set.translate(-bbox.width/2, -bbox.height/2);
+        }
         return set;
       };
 
@@ -200,10 +201,12 @@
       };
 
 
+      var labelDays = ['Today', 'Tomorrow'];
+      var weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       var rate = 0.85;
       var days = 21;
       var now = new Date();
-      now.setDate(now.getDate()-days);
+      now.setDate(now.getDate()+days);
 
       var blocks = [];
       for (var i = days; i >= 0; i--) {
@@ -221,15 +224,28 @@
           opacity: "0.8"
         });
 
+        var midy = (y+(y*rate))/2 + topMargin;
+        var nearx = parseInt((w-lw)/2);
         if (i <= 1) {
           paper.path(
-              "M" + parseInt(w-lw)/2 + "," + parseInt((y+(y*rate))/2 + topMargin) + 
-              "L" + parseInt(w-lw/2)+lw + "," + parseInt((y+(y*rate))/2 + topMargin)).attr({
+              "M" + nearx + "," + parseInt(midy) + 
+              "L" + nearx+lw + "," + parseInt(midy)).attr({
             stroke: "#fff",
             opacity: "0.2",
             'stroke-dasharray': '- '
           });
         }
+
+        var dayText = "";
+        if (i < labelDays.length) {
+          dayText = labelDays[i];
+        } else if (i >= labelDays.length && i < 7) {
+          var day = now.getDay();
+          dayText = weekDays[parseInt(now.getDay())];
+        }
+        if (dayText != "")
+          printOptima(nearx+50*size, midy, dayText, 20*size, '#fff', '#000', true);
+
 
         if (events[dateKey]) {
           for (var j = 0; j < events[dateKey].length; j++) {
@@ -277,7 +293,7 @@
           }
         }
         // Move forward a day
-        now.setDate(now.getDate()+1);
+        now.setDate(now.getDate()-1);
       }
 
     });
