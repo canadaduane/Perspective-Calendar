@@ -182,13 +182,19 @@
       };
 
       var start = function () {
-          this.ox = this.attr("cx");
-          this.oy = this.attr("cy");
+          this.ox = this.attr("x");
+          this.oy = this.attr("y");
+          //console.log('ox', this.ox, 'oy', this.oy);
           //this.animate({r: 70, opacity: .25}, 500, ">");
-      },
+      };
       var move = function (dx, dy) {
-          this.attr({cx: this.ox + dx, cy: this.oy + dy});
-      },
+        //console.log(dx, dy);
+        //console.log(this);
+        var diffx = this.attr('x') - (this.ox + dx);
+        var diffy = this.attr('y') - (this.oy + dy);
+        this.set.translate(-diffx, -diffy);
+        //this.set.attr({x: this.ox + dx, y: this.oy + dy});
+      };
       var up = function () {
           //this.animate({r: 50, opacity: .5}, 500, ">");
       };
@@ -250,16 +256,7 @@
               opacity: 1.0,
               'stroke-width': 1.5 * size
             });
-            block.draggable({
-              reluctance: 5
-            });
-            block.dragUpdate = function(over, dx, dy, event) {
-              //event.originalTarget.raphael.translate(dx, dy);
-              //console.log(over, event, dx, dy);
-              var set = event.originalTarget.raphael.set;
-              if (set) set.translate(dx, dy);
-              else console.log(event.originalTarget);
-            }
+            block.drag(move, start, up);
             blocks.push(block);
             
             var fontSize = 30*size*Math.sqrt(height*width);
