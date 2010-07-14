@@ -1,0 +1,295 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<title>Perspective Calendar</title>
+  <script src="raphael-min.js"></script>
+  <script src="raphaelle.js"></script>
+  <script src="Optima_400.font.js"></script>
+  <script src="jquery.js"></script>
+  <script type="text/javascript">
+    $(function() {
+      var w = 800, h = 600;
+      var margin = 20;
+      var topMargin = 40;
+
+      var paper = Raphael("paper", w, h);
+      gPaper = paper;
+
+      paper.path(
+        "M" + (w/2) + "," + (margin + topMargin) + 
+        "L" + margin + "," + (h-margin*2 + topMargin) + 
+        "L" + (w-margin) + "," + (h-margin*2 + topMargin) + 
+        "z").attr({
+            fill: "270-#eee-#555",
+            stroke: "#fff"
+          });
+
+      var events = {
+        '2010-07-13' : [{
+                time: '08:00',
+                color: 'red',
+                title: 'Chiropractic',
+                slide: 0.0,
+                height: 1.0,
+                width: 1.0
+        }],
+        '2010-07-12' : [{
+                time: '12:00',
+                color: 'blue',
+                title: 'Lunch w/ Matt',
+                slide: 0.5,
+                height: 1.0,
+                width: 1.0
+        }],
+        '2010-07-10' : [{
+                time: '12:00',
+                color: 'blue',
+                title: 'Banff',
+                slide: -0.2,
+                height: 1.0,
+                width: 1.0
+        }],
+        '2010-07-09' : [{
+                time: '12:00',
+                color: 'red',
+                title: 'New Years',
+                slide: 0.0,
+                height: 1.0,
+                width: 1.0
+        }],
+        '2010-07-07' : [{
+                time: '12:00',
+                color: 'blue',
+                title: 'Meet Jim for Lunch',
+                slide: 0.5,
+                height: 1.0,
+                width: 1.0
+        }],
+        '2010-07-06' : [{
+                time: '12:00',
+                color: 'blue',
+                title: 'Buy Stuff',
+                slide: -0.5,
+                height: 1.0,
+                width: 1.0
+        }],
+        '2010-07-06' : [{
+                time: '12:00',
+                color: 'blue',
+                title: 'Vacation Day',
+                slide: 0.5,
+                height: 1.0,
+                width: 1.0
+        }],
+        '2010-06-30' : [{
+                time: '12:00',
+                color: 'red',
+                title: 'Chores',
+                slide: -0.5,
+                height: 1.0,
+                width: 1.0
+        }],
+        '2010-07-03' : [{
+                time: '12:00',
+                color: 'green',
+                title: 'Meeting',
+                slide: 0.0,
+                height: 1.0,
+                width: 1.0
+        }],
+        '2010-07-01' : [{
+                time: '17:00',
+                color: 'green',
+                title: 'Pick up Rella',
+                slide: 0.5,
+                height: 9.0,
+                width: 1.0
+        }]
+      };
+
+      var widthAtHeight = function(height) {
+        var width = ((w)*(height)/(h-margin*2)) - margin*2 + 12;
+        return width;
+      };
+
+      var colorStrokeLookup = {
+        'red': '#f00',
+        'green': '#0f0',
+        'blue': '#00f'
+      };
+      var colorFillLookup = {
+        'red': '45-#500-#f99',
+        'green': '45-#050-#9f9',
+        'blue': '45-#005-#99f'
+      };
+
+      var timeToRatio = function(time) {
+        var parts = time.split(':');
+        var hour = parseFloat(parts[0]),
+            min = parseFloat(parts[1]);
+        if (hour < 8) hour = 8;
+        if (hour > 18) hour = 18;
+        var ratio = (hour-7) / (18-8);
+        return ratio;
+      };
+
+      var slideToRatio = function(slide) {
+        return ((slide + 1.0) / 2.0);
+      };
+
+      var dateToKey = function(dt) {
+        var pad = function(num) {
+          if (num.toString().length == 1) return '0' + num.toString();
+          else return num.toString();
+        };
+        var key =
+          dt.getFullYear() + '-' + 
+          pad(dt.getMonth() + 1) + '-' + 
+          pad(dt.getDate());
+        return key;
+      };
+
+      var printOptima = function(cx, cy, printText, size, color, shadow) {
+        var text, shadow, bbox, set;
+        // Draw the text and shadow
+        shadow = paper.print(cx+1, cy+1, printText, paper.getFont("Optima"), size).
+          attr({fill: shadow || "#333"});
+        text = paper.print(cx, cy, printText, paper.getFont("Optima"), size).
+          attr({fill: color || "#fff"});
+        // Construct a set of all shapes
+        set = paper.set();
+        for (var x = 0; x < text.length; x++) set.push(text[x]);
+        for (var x = 0; x < shadow.length; x++) set.push(shadow[x]);
+        // Translate all of it to center it
+        bbox = set.getBBox();
+        set.translate(-bbox.width/2, -bbox.height/2);
+
+        return set;
+      };
+
+      var twelveClock = function(timeString24hr) {
+        var parts = timeString24hr.split(':');
+        var hour = parseInt(parts[0]),
+            min = parts[1];
+        if (parts[0][0] == '0') hour = parseInt(parts[0].substr(1));
+        var am_pm = (hour < 12) ? 'am' : 'pm';
+        if (hour > 12) hour -= 12;
+        return hour.toString() + ':' + min + ' ' + am_pm;
+      };
+
+      var start = function () {
+          this.ox = this.attr("cx");
+          this.oy = this.attr("cy");
+          //this.animate({r: 70, opacity: .25}, 500, ">");
+      },
+      var move = function (dx, dy) {
+          this.attr({cx: this.ox + dx, cy: this.oy + dy});
+      },
+      var up = function () {
+          //this.animate({r: 50, opacity: .5}, 500, ">");
+      };
+
+
+      var rate = 0.85;
+      var days = 21;
+      var now = new Date();
+      now.setDate(now.getDate()-days);
+
+      var blocks = [];
+      for (var i = days; i >= 0; i--) {
+        var size = Math.pow(rate, i);
+        var y = (h - margin*2) * size;
+        var lw = parseInt(widthAtHeight(y));
+        var dateKey = dateToKey(now);
+
+        // Draw lines separating the days
+        var left = parseInt((w-lw)/2);
+        paper.path(
+            "M" + left + "," + parseInt(y + topMargin) + 
+            "L" + (left+lw) + "," + parseInt(y + topMargin)).attr({
+          stroke: "#fff",
+          opacity: "0.8"
+        });
+
+        if (i <= 1) {
+          paper.path(
+              "M" + parseInt(w-lw)/2 + "," + parseInt((y+(y*rate))/2 + topMargin) + 
+              "L" + parseInt(w-lw/2)+lw + "," + parseInt((y+(y*rate))/2 + topMargin)).attr({
+            stroke: "#fff",
+            opacity: "0.2",
+            'stroke-dasharray': '- '
+          });
+        }
+
+        if (events[dateKey]) {
+          for (var j = 0; j < events[dateKey].length; j++) {
+            var evt = events[dateKey][j];
+            var time = timeToRatio(evt.time || '12:00');
+            var color = evt.color || 'red';
+            var title = evt.title || 'Untitled';
+            var slide = evt.slide || 0.0;
+            var height = evt.height || 1.0;
+            var width = evt.width || 1.0;
+
+            var blockWidth = 100;
+            var blockHeight = 45;
+            var heightDiff = (y-(y*rate));
+
+            // Draw events on each day
+            var px = (w - blockWidth*size*width + lw*slide)*0.5;
+            var py = y - heightDiff*time - (blockHeight*size*height) + topMargin;
+            var pw = blockWidth*size*width;
+            var ph = blockHeight*size*height;
+            var block = paper.rect(px, py, pw, ph, 2).attr({
+              stroke: colorStrokeLookup[color],
+              fill: colorFillLookup[color],
+              opacity: 1.0,
+              'stroke-width': 1.5 * size
+            });
+            block.draggable({
+              reluctance: 5
+            });
+            block.dragUpdate = function(over, dx, dy, event) {
+              //event.originalTarget.raphael.translate(dx, dy);
+              //console.log(over, event, dx, dy);
+              var set = event.originalTarget.raphael.set;
+              if (set) set.translate(dx, dy);
+              else console.log(event.originalTarget);
+            }
+            blocks.push(block);
+            
+            var fontSize = 30*size*Math.sqrt(height*width);
+            // Show text titles with shadow
+            var titleText = printOptima(px+pw/2, py, title, fontSize);
+            // console.log(ts);
+            // ts[0].draggable({drag_obj: block});
+
+            // Show text time for today only
+            if (i <= 1) {
+              var timeText = printOptima(px+pw/2, py+fontSize, twelveClock(evt.time), fontSize*0.7);
+              for (var x = 0; x < timeText.length; x++)
+                titleText.push(timeText[x]);
+            }
+
+            titleText.push(block);
+            block.set = titleText;
+          }
+        }
+        // Move forward a day
+        now.setDate(now.getDate()+1);
+      }
+
+    });
+  </script>
+</head>
+
+<body>
+  <div id="paper" align="center"></div>
+
+</body>
+</html>
+
