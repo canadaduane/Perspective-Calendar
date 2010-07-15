@@ -219,7 +219,6 @@ $(function() {
   var start = function (x, y) {
     this.ox = x;
     this.oy = y;
-    // console.log('ox', this.ox, 'oy', this.oy);
   };
 
   var move = function (dx, dy, x, y) {
@@ -232,24 +231,11 @@ $(function() {
     this.cube.moveTo(p.x, p.y, p.z);
   };
 
-  cube.dragFace.cube = cube;
-  cube.dragFace.drag(move, start);
+  var stop = function() {
+    cube.dragFace.cube = cube;
+    cube.dragFace.drag(move, start, stop);
+  };
 
-  // $('#canvas svg').mousemove(function(e) {
-  //   var offset = $(e.currentTarget).offset();
-  //   var sx = e.clientX - offset.left;
-  //   var sy = e.clientY - offset.top;
-    
-  //   // console.log(offset, e);
-  //   // console.log(sx, sy);
-  //   var cx = paper.width/2.0, cy = 0.0;
-  //   var square = Math.sqrt(paper.width * paper.height);
-  //   var y = 1.0;
-  //   var z = (y*square)/sy;
-  //   var x = z*(sx-cx)/square;
-  //   // console.log('x',x,'y',y,'z',z);
-  //   cube.moveTo(x, y, z);
-  // });
+  stop();
 
-  console.log(cube.screen);
 });
