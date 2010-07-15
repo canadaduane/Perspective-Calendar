@@ -1,4 +1,6 @@
 require 'rubygems'
 require 'nokogiri'
 
-https://itxmail01/owa/?ae=Folder&t=IPF.Appointment&yr=2010&mn=7&dy=14
+$fetch_day_url = %{https://itxmail01/owa/?ae=Folder&t=IPF.Appointment&yr=%s&mn=%s&dy=%s}
+$login_url = %{https://itxmail01/owa/auth/logon.aspx}
+

@@ -223,23 +223,13 @@ $(function() {
   };
 
   var move = function (dx, dy, x, y) {
-    // var p1 = screenToThree(paper, x, y);
-    // var p2 = screenToThree(paper, this.ox, this.oy);
-    // console.log(this, p1, p2);
     var diffx = (x - this.ox);
     var diffy = (y - this.oy);
     this.ox = x;
     this.oy = y;
-
     var scr = this.cube.screen;
     var p = screenToThree(paper, scr.x + diffx, scr.y + diffy);
-    // console.log('scr', scr, 'p.x', p.x, 'p.y', p.y, 'p.z', p.z, 'diffx', diffx, 'diffy', diffy);
     this.cube.moveTo(p.x, p.y, p.z);
-    // cube.translate(p1[0]-p2[0], p1[1]-p2[1], p1[2]-p2[2]);
-    // cube.frontFace.set = cube.set;
-    // cube.frontFace.drag(move, start);
-    // cube.ox = x;
-    // cube.oy = y;
   };
 
   cube.dragFace.cube = cube;
