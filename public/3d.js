@@ -48,6 +48,25 @@ var line = function(paper, p1, p2) {
           parseInt(p2.y / p2.z * square + cy));
 };
 
+var printOptima = function(paper, cx, cy, printText, size, color, shadow, leftAlign) {
+  var text, shadow, bbox, set;
+  // Draw the text and shadow
+  shadow = paper.print(cx-1, cy-1, printText, paper.getFont("Optima"), size).
+    attr({fill: shadow || "#eee"});
+  text = paper.print(cx, cy, printText, paper.getFont("Optima"), size).
+    attr({fill: color || "#222"});
+  // Construct a set of all shapes
+  set = paper.set();
+  for (var x = 0; x < text.length; x++) set.push(text[x]);
+  for (var x = 0; x < shadow.length; x++) set.push(shadow[x]);
+  if (!leftAlign) {
+    // Translate all of it to center it
+    bbox = set.getBBox();
+    set.translate(-bbox.width/2, 0);
+  }
+  return set;
+};
+
 var threeToScreen = function(paper, x, y, z) {
   var sx = x / z * paper.square + paper.cx;
   var sy = y / z * paper.square + paper.cy;
@@ -206,36 +225,101 @@ $(function() {
   paper.rect(0, 0, 800, 600).attr({opacity:0});
   // paper.circle().attr({cx:400, cy:300, r:20});
 
+  // Paint the timeline (timeplane?)
   var initial_z = 1.16;
   new Cube(paper, {color:'panel'}).size(1.2, 0.0, 100.0).corner(-0.6, 1.0, initial_z).draw();
   for (var i = 0; i < 14; i++) {
     var z = initial_z + i/2.0;
     line(paper, {x:-0.6,y:1.0,z:z}, {x:0.6,y:1.0,z:z}).attr({stroke: '#fff', opacity: 0.75});
   }
-  new Cube(paper, {color:'red'}).corner(-0.5, 1.0, initial_z+0.5*2).size(0.2, 0.2, 0.5).draw();
-  new Cube(paper, {color:'green'}).corner(-0.3, 1.0, initial_z+0.5*4).size(0.2, 0.2, 0.5).draw();
-  cube = new Cube(paper, {color:'blue'}).corner(0.2, 1.0, initial_z+0.5*7).size(0.2, 0.2, 0.5).draw();
 
-  var start = function (x, y) {
-    this.ox = x;
-    this.oy = y;
+  var CalEvent = function(title, track, importance, starts, ends, color) {
+    var defaults = {
+      color: 'red',
+      width: 1.2/3.0,
+      height: 0.1
+    };
+
+    var now = new Date();
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    var dateToZ = function(dt) {
+      var factor = 1000 * 60 * 60 * 24;
+      var z = (dt.valueOf() - today.valueOf()) / factor;
+      return (z / 2) + initial_z;
+    };
+
+    var depth = dateToZ(ends) - dateToZ(starts);
+
+    var p = {
+      x: -0.6 + (track * defaults.width),
+      y: 1.0,
+      z: dateToZ(starts) 
+    };
+    // console.log(p);
+
+    var cube = this.cube = 
+      new Cube(paper,
+        {color: color || defaults.color}).
+      corner(p.x, p.y, p.z).
+      size(
+        defaults.width, 
+        defaults.height * (importance+1), 
+        depth).
+      draw();
+
+    var titleSet;
+    var printTitle = function() {
+      if (titleSet) titleSet.remove();
+      var face = cube.frontFace.getBBox();
+      var opx = face.x + face.width/2;
+      var opy = face.y - (14)/cube.z;
+      titleSet = printOptima(paper, opx, opy, title, 40/cube.z);
+    };
+    printTitle();
+
+    var dragEvents = {
+      start: function (x, y) {
+        this.startx = x;
+        this.starty = y;
+        this.ox = x;
+        this.oy = y;
+      },
+      move: function (dx, dy, x, y) {
+        var diffx = (x - this.ox);
+        var diffy = (y - this.oy);
+        this.ox = x;
+        this.oy = y;
+        var scr = cube.screen;
+        var p = screenToThree(paper, scr.x + diffx, scr.y + diffy);
+        
+        // Constrain x movement to 3 tracks
+        var offset = $('#canvas svg').offset();
+        var sx = x - offset.left, sy = y - offset.top;
+        var q = screenToThree(paper, sx, sy);
+        var trk = Math.floor((q.x + 0.6) / (1.2/3.0));
+        if (trk < 0) trk = 0;
+        if (trk > 2) trk = 2;
+        p.x = (-0.6 + trk*(1.2/3.0));
+
+        cube.moveTo(p.x, p.y, p.z);
+        printTitle();
+      },
+      stop: function() {
+        cube.dragFace.drag(
+          dragEvents.move, 
+          dragEvents.start,
+          dragEvents.stop);
+      }
+    };
+
+    // Initialize the drag/drop functionality
+    dragEvents.stop();
   };
 
-  var move = function (dx, dy, x, y) {
-    var diffx = (x - this.ox);
-    var diffy = (y - this.oy);
-    this.ox = x;
-    this.oy = y;
-    var scr = this.cube.screen;
-    var p = screenToThree(paper, scr.x + diffx, scr.y + diffy);
-    this.cube.moveTo(p.x, p.y, p.z);
-  };
+  new CalEvent("test", 0, 0, new Date(2010, 6, 15, 7), new Date(2010, 6, 15, 8), 'blue');
+  new CalEvent("Pick up Rella", 2, 0, new Date(2010, 6, 16, 19), new Date(2010, 6, 16, 20), 'blue');
+  new CalEvent("Vacation", 1, 0, new Date(2010, 6, 16, 19), new Date(2010, 6, 16, 20), 'red');
 
-  var stop = function() {
-    cube.dragFace.cube = cube;
-    cube.dragFace.drag(move, start, stop);
-  };
-
-  stop();
-
+  // printOptima(paper, 200, 100, "Test Optima", 30);
 });
