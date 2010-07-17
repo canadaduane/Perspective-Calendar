@@ -31,6 +31,8 @@
             for (var i = 0; i < entries.length; i++) { 
               var entry = entries[i];
               var title = entry.getTitle().getText();
+              var details = entry.getContent().getText();
+              //console.log(entry.getContent().getText());
 
               // Get event start/end time
               var startDate = null, endDate = null;
@@ -38,8 +40,15 @@
               if (times.length > 0) {
                 startDate = times[0].getStartTime().getDate();
                 endDate = times[0].getEndTime().getDate();
+
+                var track = 0;
+                if (details.match(/\[middle\]/i)) track = 1;
+                if (details.match(/\[right\]/i)) track = 2;
+
+                var importance = 0;
+                if (details.match(/\[important\]/i)) importance = 3;
                 
-                new CalEvent(title, 0, 0, startDate, endDate, 'blue');
+                new CalEvent(title, track, importance, startDate, endDate, 'blue');
               }
             }
           },

@@ -280,8 +280,8 @@ var InitPerspectiveCalendar = function() {
       if (titleSet) titleSet.remove();
       var face = cube.frontFace.getBBox();
       var opx = face.x + face.width/2;
-      var opy = face.y - (14)/cube.z;
-      titleSet = printOptima(paper, opx, opy, title, 40/cube.z);
+      var opy = face.y - (14+(importance+1)*5)/cube.z;
+      titleSet = printOptima(paper, opx, opy, title, (40+(importance+1)*5)/cube.z);
     };
     printTitle();
 
