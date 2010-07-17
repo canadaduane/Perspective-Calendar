@@ -3,12 +3,12 @@ Perspective Calendar
 
 This project grew out of Marco Arment's "Logarithmic Calendar" blog post [1] and my own spin on the idea to make a calendar into a 3D perspective view [2].  The basic idea is simple: you care most about your near future, and less about your distant future.  That sounds an awful lot like looking down a busy street--the closer things and people are to you, the more you have to think about how to navigate through and around them.
 
-There's a little exception to this general rule, and it goes like this: There are a handful of future events that are so important that you actually WANT to see them coming from a mile away.  For example, you may want to prepare for your final exams, anticipate your boyfriend's birthday, or worry about January 1st, 2012.
+There's a little exception to this general rule, and it goes like this: There are a handful of future events that are so important that you actually WANT to see them coming from a mile away.  For example, you may want to prepare for your final exams, anticipate your boyfriend's birthday, or worry about January 1st, 2012.  In these cases, it would be handy to have a very large object in the distance to represent the importance of such an event.  This is precisely what the Perspective Calendar does.
 
 Demo
 ----
 
-If all goes as planned, the project should be available as a [demo page](http://canadaduane.github.com/Perspective-Calendar) here on Github.
+The project is available as a [demo page](http://canadaduane.github.com/Perspective-Calendar) here on Github.
 
 
 How it Works
