@@ -280,8 +280,8 @@ var InitPerspectiveCalendar = function() {
       if (titleSet) titleSet.remove();
       var face = cube.frontFace.getBBox();
       var opx = face.x + face.width/2;
-      var opy = face.y - (14+(importance+1)*5)/cube.z;
-      titleSet = printOptima(paper, opx, opy, title, (40+(importance+1)*5)/cube.z);
+      var opy = face.y - (14+(importance+1)*6)/cube.z;
+      titleSet = printOptima(paper, opx, opy, title, (40+(importance+1)*12)/cube.z);
     };
     printTitle();
 
@@ -324,10 +324,5 @@ var InitPerspectiveCalendar = function() {
     dragEvents.stop();
   };
 
-  // new CalEvent("Lunch w/ Matt", 0, 0, new Date(2010, 6, 16, 7), new Date(2010, 6, 16, 8), 'blue');
-  // new CalEvent("Pick up Rella", 2, 2, new Date(2010, 6, 17, 19), new Date(2010, 6, 17, 20), 'blue');
-  // new CalEvent("Vacation", 1, 0, new Date(2010, 6, 17, 0), new Date(2010, 6, 18, 23, 59), 'red');
-
-  // printOptima(paper, 200, 100, "Test Optima", 30);
   return CalEvent;
 };

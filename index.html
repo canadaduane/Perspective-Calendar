@@ -47,8 +47,11 @@
 
                 var importance = 0;
                 if (details.match(/\[important\]/i)) importance = 3;
+
+                var color = 'blue';
+                if (details.match(/\[red\]/i)) color = 'red';
                 
-                new CalEvent(title, track, importance, startDate, endDate, 'blue');
+                new CalEvent(title, track, importance, startDate, endDate, color);
               }
             }
           },
