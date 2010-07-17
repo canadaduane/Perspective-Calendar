@@ -32,7 +32,7 @@ var colors = {
     'stroke': '#99f'
   },
   'panel': {
-    'top'   : '90-#aaa-#fbfbfb',
+    'top'   : '90-#aaa-#fff',
     'stroke': '#fff'
   }
 };
@@ -133,13 +133,13 @@ var Cube = function(paper, attrs) {
     draw: function() {
       var paper = this.paper;
       var w2 = this.w/2, h2 = this.h/2, d2 = this.d/2;
-      var attr = {stroke: colors[this.color].stroke};
+      var attr = {stroke: colors[this.color].stroke, opacity: 0.3};
       this.set = this.paper.set();
 
       this.screen = threeToScreen(this.paper, this.x, this.y, this.z);
 
       // Left face
-      if (this.x > 0)
+      if (this.x > 0.01)
         this.set.push(this.leftFace = this.quad(
           {x:this.x, y:this.y-this.h, z:this.z},
           {x:this.x, y:this.y, z:this.z},
@@ -148,7 +148,7 @@ var Cube = function(paper, attrs) {
             attr($.extend({fill: colors[this.color].left}, attr)));
 
       // Right face
-      if (this.x < 0)
+      if (this.x + w2 < -0.01)
         this.set.push(this.rightFace = this.quad(
           {x:this.x+this.w, y:this.y-this.h, z:this.z},
           {x:this.x+this.w, y:this.y, z:this.z},
@@ -157,7 +157,7 @@ var Cube = function(paper, attrs) {
             attr($.extend({fill: colors[this.color].right}, attr)));
 
       // Top face
-      if (this.y > 0)
+      if (this.y > 0.01)
         this.set.push(this.topFace = this.quad(
           {x:this.x, y:this.y-this.h, z:this.z+this.d},
           {x:this.x+this.w, y:this.y-this.h, z:this.z+this.d},
@@ -166,7 +166,7 @@ var Cube = function(paper, attrs) {
             attr($.extend({fill: colors[this.color].top}, attr)));
 
       // Bottom face
-      if (this.y < 0)
+      if (this.y + h2 < 0.01)
         this.set.push(this.bottomFace = this.quad(
           {x:this.x, y:this.y, z:this.z+this.d},
           {x:this.x+this.w, y:this.y, z:this.z+this.d},
@@ -174,8 +174,15 @@ var Cube = function(paper, attrs) {
           {x:this.x, y:this.y, z:this.z}).
             attr($.extend({fill: colors[this.color].bottom}, attr)));
 
-      // Front face
       if (this.w > 0 && this.h > 0) {
+        // Back face
+        this.set.push(this.backFace = this.quad(
+          {x:this.x, y:this.y, z:this.z+this.d},
+          {x:this.x+this.w, y:this.y, z:this.z+this.d},
+          {x:this.x+this.w, y:this.y-this.h, z:this.z+this.d},
+          {x:this.x, y:this.y-this.h, z:this.z+this.d}).
+            attr({stroke: colors[this.color].stroke, opacity: 0.5}));
+        // Front face
         this.set.push(this.frontFace = this.quad(
           {x:this.x, y:this.y, z:this.z},
           {x:this.x+this.w, y:this.y, z:this.z},
@@ -215,7 +222,7 @@ var Cube = function(paper, attrs) {
   }, attrs);
 };
 
-$(function() {
+var InitPerspectiveCalendar = function() {
   // Init "Paper"
   var paper = new Raphael('canvas', 800, 600);
   paper.square = Math.sqrt(paper.width * paper.height);
@@ -317,9 +324,10 @@ $(function() {
     dragEvents.stop();
   };
 
-  new CalEvent("test", 0, 0, new Date(2010, 6, 15, 7), new Date(2010, 6, 15, 8), 'blue');
-  new CalEvent("Pick up Rella", 2, 0, new Date(2010, 6, 16, 19), new Date(2010, 6, 16, 20), 'blue');
-  new CalEvent("Vacation", 1, 0, new Date(2010, 6, 16, 19), new Date(2010, 6, 16, 20), 'red');
+  // new CalEvent("Lunch w/ Matt", 0, 0, new Date(2010, 6, 16, 7), new Date(2010, 6, 16, 8), 'blue');
+  // new CalEvent("Pick up Rella", 2, 2, new Date(2010, 6, 17, 19), new Date(2010, 6, 17, 20), 'blue');
+  // new CalEvent("Vacation", 1, 0, new Date(2010, 6, 17, 0), new Date(2010, 6, 18, 23, 59), 'red');
 
   // printOptima(paper, 200, 100, "Test Optima", 30);
-});
+  return CalEvent;
+};
