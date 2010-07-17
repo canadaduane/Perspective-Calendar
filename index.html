@@ -5,304 +5,59 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
-	<title>Perspective Calendar</title>
-  <script src="raphael-min.js"></script>
-  <script src="raphaelle.js"></script>
-  <script src="Optima_400.font.js"></script>
-  <script src="jquery.js"></script>
+	<title>3D Test</title>
+  <script type="text/javascript" src="raphael-min.js"></script>
+  <script type="text/javascript" src="Optima_400.font.js"></script>
+  <script type="text/javascript" src="jquery.js"></script>
+  <script type="text/javascript" src="perspective-cal.js"></script>
+  <script type="text/javascript" src="http://www.google.com/jsapi"></script>
   <script type="text/javascript">
-    $(function() {
-      var w = 800, h = 600;
-      var margin = 20;
-      var topMargin = 40;
+    google.load("gdata", "2");
+    google.setOnLoadCallback(function() {
+      $(function() {
+        var CalEvent = InitPerspectiveCalendar();
 
-      var paper = Raphael("paper", w, h);
-      gPaper = paper;
+        var feedUrl = "http://www.google.com/calendar/feeds/8qilj7foed8k83g865heo4u0t8%40group.calendar.google.com/public/full";
+        var service = new google.gdata.calendar.CalendarService('PerspectiveCalendar');
+        var query = new google.gdata.calendar.CalendarEventQuery(feedUrl);
+        query.setOrderBy('starttime');
+        query.setSortOrder('ascending');
+        query.setFutureEvents(true);
+        query.setSingleEvents(true);
+        query.setMaxResults(10);
+        service.getEventsFeed(query, 
+          function(root) {
+            var entries = root.feed.getEntries();
+            for (var i = 0; i < entries.length; i++) { 
+              var entry = entries[i];
+              var title = entry.getTitle().getText();
 
-      paper.path(
-        "M" + (w/2) + "," + (margin + topMargin) + 
-        "L" + margin + "," + (h-margin*2 + topMargin) + 
-        "L" + (w-margin) + "," + (h-margin*2 + topMargin) + 
-        "z").attr({
-            fill: "270-#eee-#555",
-            stroke: "#fff"
-          });
-
-      var events = {
-        '2010-07-13' : [{
-                time: '08:00',
-                color: 'red',
-                title: 'Chiropractic',
-                slide: 0.0,
-                height: 1.0,
-                width: 1.0
-        }],
-        '2010-07-14' : [{
-                time: '12:00',
-                color: 'blue',
-                title: 'Lunch w/ Matt',
-                slide: 0.5,
-                height: 1.0,
-                width: 1.0
-        }],
-        '2010-07-16' : [{
-                time: '12:00',
-                color: 'blue',
-                title: 'Banff',
-                slide: -0.2,
-                height: 1.0,
-                width: 1.0
-        }],
-        '2010-07-17' : [{
-                time: '12:00',
-                color: 'red',
-                title: 'New Years',
-                slide: 0.0,
-                height: 1.0,
-                width: 1.0
-        }],
-        '2010-07-19' : [{
-                time: '12:00',
-                color: 'blue',
-                title: 'Meet Jim for Lunch',
-                slide: 0.5,
-                height: 1.0,
-                width: 1.0
-        }],
-        '2010-07-20' : [{
-                time: '12:00',
-                color: 'blue',
-                title: 'Buy Stuff',
-                slide: -0.5,
-                height: 1.0,
-                width: 1.0
-        }],
-        '2010-07-20' : [{
-                time: '12:00',
-                color: 'blue',
-                title: 'Vacation Day',
-                slide: 0.5,
-                height: 1.0,
-                width: 1.0
-        }],
-        '2010-07-26' : [{
-                time: '12:00',
-                color: 'red',
-                title: 'Chores',
-                slide: -0.5,
-                height: 1.0,
-                width: 1.0
-        }],
-        '2010-07-27' : [{
-                time: '12:00',
-                color: 'green',
-                title: 'Meeting',
-                slide: 0.0,
-                height: 1.0,
-                width: 1.0
-        }],
-        '2010-07-28' : [{
-                time: '17:00',
-                color: 'green',
-                title: 'Pick up Rella',
-                slide: 0.5,
-                height: 9.0,
-                width: 1.0
-        }]
-      };
-
-      var widthAtHeight = function(height) {
-        var width = ((w)*(height)/(h-margin*2)) - margin*2 + 12;
-        return width;
-      };
-
-      var colorStrokeLookup = {
-        'red': '#f00',
-        'green': '#0f0',
-        'blue': '#00f'
-      };
-      var colorFillLookup = {
-        'red': '45-#500-#f99',
-        'green': '45-#050-#9f9',
-        'blue': '45-#005-#99f'
-      };
-
-      var timeToRatio = function(time) {
-        var parts = time.split(':');
-        var hour = parseFloat(parts[0]),
-            min = parseFloat(parts[1]);
-        if (hour < 8) hour = 8;
-        if (hour > 18) hour = 18;
-        var ratio = (hour-7) / (18-8);
-        return ratio;
-      };
-
-      var slideToRatio = function(slide) {
-        return ((slide + 1.0) / 2.0);
-      };
-
-      var dateToKey = function(dt) {
-        var pad = function(num) {
-          if (num.toString().length == 1) return '0' + num.toString();
-          else return num.toString();
-        };
-        var key =
-          dt.getFullYear() + '-' + 
-          pad(dt.getMonth() + 1) + '-' + 
-          pad(dt.getDate());
-        return key;
-      };
-
-      var printOptima = function(cx, cy, printText, size, color, shadow, leftAlign) {
-        var text, shadow, bbox, set;
-        // Draw the text and shadow
-        shadow = paper.print(cx+1, cy+1, printText, paper.getFont("Optima"), size).
-          attr({fill: shadow || "#333"});
-        text = paper.print(cx, cy, printText, paper.getFont("Optima"), size).
-          attr({fill: color || "#fff"});
-        // Construct a set of all shapes
-        set = paper.set();
-        for (var x = 0; x < text.length; x++) set.push(text[x]);
-        for (var x = 0; x < shadow.length; x++) set.push(shadow[x]);
-        if (!leftAlign) {
-          // Translate all of it to center it
-          bbox = set.getBBox();
-          set.translate(-bbox.width/2, -bbox.height/2);
-        }
-        return set;
-      };
-
-      var twelveClock = function(timeString24hr) {
-        var parts = timeString24hr.split(':');
-        var hour = parseInt(parts[0]),
-            min = parts[1];
-        if (parts[0][0] == '0') hour = parseInt(parts[0].substr(1));
-        var am_pm = (hour < 12) ? 'am' : 'pm';
-        if (hour > 12) hour -= 12;
-        return hour.toString() + ':' + min + ' ' + am_pm;
-      };
-
-      var start = function () {
-          this.ox = this.attr("x");
-          this.oy = this.attr("y");
-          //console.log('ox', this.ox, 'oy', this.oy);
-          //this.animate({r: 70, opacity: .25}, 500, ">");
-      };
-      var move = function (dx, dy) {
-        //console.log(dx, dy);
-        //console.log(this);
-        var diffx = this.attr('x') - (this.ox + dx);
-        var diffy = this.attr('y') - (this.oy + dy);
-        this.set.translate(-diffx, -diffy);
-        //this.set.attr({x: this.ox + dx, y: this.oy + dy});
-      };
-      var up = function () {
-          //this.animate({r: 50, opacity: .5}, 500, ">");
-      };
-
-
-      var labelDays = ['Today', 'Tomorrow'];
-      var weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      var rate = 0.85;
-      var days = 21;
-      var now = new Date();
-      now.setDate(now.getDate()-1);
-      now.setDate(now.getDate()+days);
-
-      var blocks = [];
-      for (var i = days; i >= 0; i--) {
-        var size = Math.pow(rate, i);
-        var y = (h - margin*2) * size;
-        var lw = parseInt(widthAtHeight(y));
-        var dateKey = dateToKey(now);
-
-        // Draw lines separating the days
-        var left = parseInt((w-lw)/2);
-        paper.path(
-            "M" + left + "," + parseInt(y + topMargin) + 
-            "L" + (left+lw) + "," + parseInt(y + topMargin)).attr({
-          stroke: "#fff",
-          opacity: "0.8"
-        });
-
-        var heightDiff = (y-(y*rate));
-        var midy = heightDiff/2 + topMargin;
-        var nearx = parseInt((w-lw)/2);
-        if (i <= 1) {
-          paper.path(
-              "M" + nearx + "," + parseInt(midy) + 
-              "L" + nearx+lw + "," + parseInt(midy)).attr({
-            stroke: "#fff",
-            opacity: "0.2",
-            'stroke-dasharray': '- '
-          });
-        }
-
-        var dayText = "";
-        if (i < labelDays.length) {
-          dayText = labelDays[i];
-        } else if (i >= labelDays.length && i < 7) {
-          var day = now.getDay();
-          dayText = weekDays[parseInt(now.getDay())];
-        }
-        if (dayText != "")
-          printOptima(nearx+50*size, midy, dayText, 20*size, '#fff', '#000', true);
-
-
-        if (events[dateKey]) {
-          for (var j = 0; j < events[dateKey].length; j++) {
-            var evt = events[dateKey][j];
-            var time = timeToRatio(evt.time || '12:00');
-            var color = evt.color || 'red';
-            var title = evt.title || 'Untitled';
-            var slide = evt.slide || 0.0;
-            var height = evt.height || 1.0;
-            var width = evt.width || 1.0;
-
-            var blockWidth = 100;
-            var blockHeight = 45;
-
-            // Draw events on each day
-            var px = (w - blockWidth*size*width + lw*slide)*0.5;
-            var py = y - heightDiff*time - (blockHeight*size*height) + topMargin;
-            var pw = blockWidth*size*width;
-            var ph = blockHeight*size*height;
-            var block = paper.rect(px, py, pw, ph, 2).attr({
-              stroke: colorStrokeLookup[color],
-              fill: colorFillLookup[color],
-              opacity: 1.0,
-              'stroke-width': 1.5 * size
-            });
-            block.drag(move, start, up);
-            blocks.push(block);
-            
-            var fontSize = 30*size*Math.sqrt(height*width);
-            // Show text titles with shadow
-            var titleText = printOptima(px+pw/2, py, title, fontSize);
-            // console.log(ts);
-            // ts[0].draggable({drag_obj: block});
-
-            // Show text time for today only
-            if (i <= 1) {
-              var timeText = printOptima(px+pw/2, py+fontSize, twelveClock(evt.time), fontSize*0.7);
-              for (var x = 0; x < timeText.length; x++)
-                titleText.push(timeText[x]);
+              // Get event start/end time
+              var startDate = null, endDate = null;
+              var times = entry.getTimes();
+              if (times.length > 0) {
+                startDate = times[0].getStartTime().getDate();
+                endDate = times[0].getEndTime().getDate();
+                
+                new CalEvent(title, 0, 0, startDate, endDate, 'blue');
+              }
             }
-
-            titleText.push(block);
-            block.set = titleText;
+          },
+          function(a,b,c) {
+            console.log('failure',a,b,c);
           }
-        }
-        // Move forward a day
-        now.setDate(now.getDate()-1);
-      }
-
+        );
+      });
     });
   </script>
+  <style>
+    svg {border:1px solid black;}
+  </style>
 </head>
 
 <body>
-  <div id="paper" align="center"></div>
+
+  <div id="canvas" align="center"></div>
 
 </body>
 </html>
