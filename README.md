@@ -5,6 +5,14 @@ This project grew out of Marco Arment's "Logarithmic Calendar" blog post [1] and
 
 There's a little exception to this general rule, and it goes like this: There are a handful of future events that are so important that you actually WANT to see them coming from a mile away.  For example, you may want to prepare for your final exams, anticipate your boyfriend's birthday, or worry about January 1st, 2012.
 
+Demo
+----
+
+If all goes as planned, the project should be available as a Github page:
+
+http://canadaduane.github.com/Perspective-Calendar
+
+
 How it Works
 ------------
 
@@ -15,6 +23,9 @@ Present & Future
 
 Currently, events are mapped to the left-hand side of the "road" and rendered in a single color.  The events can be dragged around to different "tracks" and times, but they are not yet saved.  In other words, this is a read-only calendar view, with some support for future calendar editing possibilities.
 
+
+
 [1] http://www.marco.org/480805355
+
 [2] http://blog.inquirylabs.com/2010/07/12/perspective-calendar/
 
