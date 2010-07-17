@@ -8,9 +8,7 @@ There's a little exception to this general rule, and it goes like this: There ar
 Demo
 ----
 
-If all goes as planned, the project should be available as a Github page:
-
-http://canadaduane.github.com/Perspective-Calendar
+If all goes as planned, the project should be available as a [demo page](http://canadaduane.github.com/Perspective-Calendar) here on Github.
 
 
 How it Works
