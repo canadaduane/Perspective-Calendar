@@ -232,6 +232,9 @@ var InitPerspectiveCalendar = function() {
   paper.rect(0, 0, 800, 600).attr({opacity:0});
   // paper.circle().attr({cx:400, cy:300, r:20});
 
+  var labelDays = ['Today', 'Tomorrow'];
+  var weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
   // Paint the timeline (timeplane?)
   var initial_z = 1.16;
   new Cube(paper, {color:'panel'}).size(1.2, 0.0, 100.0).corner(-0.6, 1.0, initial_z).draw();
@@ -240,10 +243,18 @@ var InitPerspectiveCalendar = function() {
     line(paper, {x:-0.6,y:1.0,z:z}, {x:0.6,y:1.0,z:z}).attr({stroke: '#fff', opacity: 0.75});
     
     // Label the days
-    if (i == 0) {
+    
+    var dayText = "";
+    if (i < labelDays.length) {
+      dayText = labelDays[i];
+    } else if (i >= labelDays.length && i < 7) {
+      var now = new Date();
+      now.setDate(now.getDate()+i);
+      dayText = weekDays[parseInt(now.getDay())];
+    }
+    if (dayText != "") {
       var w = threeToScreen(paper, -0.6, 1.0, z + 0.05); 
-      var title = "Today";
-      titleSet = printOptima(paper, w.x, w.y, title, (40/z));
+      printOptima(paper, w.x, w.y, dayText, (40/z));
     }
   }
 
