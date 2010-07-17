@@ -238,6 +238,13 @@ var InitPerspectiveCalendar = function() {
   for (var i = 0; i < 14; i++) {
     var z = initial_z + i/2.0;
     line(paper, {x:-0.6,y:1.0,z:z}, {x:0.6,y:1.0,z:z}).attr({stroke: '#fff', opacity: 0.75});
+    
+    // Label the days
+    if (i == 0) {
+      var w = threeToScreen(paper, -0.6, 1.0, z + 0.05); 
+      var title = "Today";
+      titleSet = printOptima(paper, w.x, w.y, title, (40/z));
+    }
   }
 
   var CalEvent = function(title, track, importance, starts, ends, color) {
