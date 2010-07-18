@@ -48,7 +48,7 @@ var line = function(paper, p1, p2) {
           parseInt(p2.y / p2.z * square + cy));
 };
 
-var printOptima = function(paper, cx, cy, printText, size, color, shadow, leftAlign) {
+var printOptima = function(paper, cx, cy, printText, size, leftAlign, color, shadow) {
   var text, shadow, bbox, set;
   // Draw the text and shadow
   shadow = paper.print(cx-1, cy-1, printText, paper.getFont("Optima"), size).
@@ -65,6 +65,10 @@ var printOptima = function(paper, cx, cy, printText, size, color, shadow, leftAl
     set.translate(-bbox.width/2, 0);
   }
   return set;
+};
+
+var formatDate = function(dt) {
+  return dt.toDateString();
 };
 
 var threeToScreen = function(paper, x, y, z) {
@@ -245,16 +249,21 @@ var InitPerspectiveCalendar = function() {
     // Label the days
     
     var dayText = "";
+    var now = new Date();
+    now.setDate(now.getDate()+i);
     if (i < labelDays.length) {
       dayText = labelDays[i];
     } else if (i >= labelDays.length && i < 7) {
-      var now = new Date();
-      now.setDate(now.getDate()+i);
       dayText = weekDays[parseInt(now.getDay())];
     }
     if (dayText != "") {
       var w = threeToScreen(paper, -0.6, 1.0, z + 0.05); 
-      printOptima(paper, w.x, w.y, dayText, (40/z));
+      if (i <= 1) {
+        printOptima(paper, w.x, w.y - 30 + i*6, dayText, (40/z), true);
+        printOptima(paper, w.x, w.y, formatDate(now), (30/z), true);
+      } else {
+        printOptima(paper, w.x, w.y, dayText, (40/z), true);
+      }
     }
   }
 
